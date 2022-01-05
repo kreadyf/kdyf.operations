@@ -19,13 +19,17 @@ namespace kdyf.operations
             _serviceProvider = serviceProvider;
         }
 
-        public IOperationInnerExecutor<TOp, TInOut, TInOut> Add<TOp, TInOut>(Func<TInOut> input) where TOp : IOperation<TInOut>
+        public IOperationInnerExecutor<TOp, TInOut, TInOut> Add<TOp, TInOut>(Func<TInOut> input = null) where TOp : IOperation<TInOut>
         {
-            return new OperationInnerExecutor<TOp, TInOut, TInOut>(null, prev => input(), _serviceProvider);
+            return new OperationInnerExecutor<TOp, TInOut, TInOut>(default, prev => input(), _serviceProvider);
+        }
+
+        public IOperationInnerExecutor<TOp, TInOut, TInOut> Add<TOp, TInOut>() where TOp : IOperation<TInOut>
+        {
+            return new OperationInnerExecutor<TOp, TInOut, TInOut>(default, prev => default(TInOut), _serviceProvider);
         }
     }
 
-    // todo remove new() and use DI
     public class OperationInnerExecutor<TOp, TInOut, TInOutPrev> : IOperationInnerExecutor<TOp, TInOut, TInOutPrev> where TOp : IOperation<TInOut>
     {
         private readonly IOperationInnerExecutor<TInOutPrev> _previous;
@@ -52,13 +56,13 @@ namespace kdyf.operations
         public async Task<IOperationResult<TInOut>> Execute(CancellationToken cancellationToken = default)
         {
             /*Method 1: elegant and quite fast, but recursive stack overflow if to many operations*/
-            IOperationResult<TInOutPrev> prevResult = null;
+            IOperationResult<TInOutPrev>? prevResult = null;
             if (_previous != null)
                 prevResult = await _previous.Execute(cancellationToken);
 
-            TOp op = _serviceProvider.GetService<TOp>();
+            TOp op = _serviceProvider.GetRequiredService<TOp>();
 
-            var result = await op.Execute(_inputFunc(prevResult == null ? default(TInOutPrev) : prevResult.Result), cancellationToken);
+            var result = await op.Execute(_inputFunc(prevResult == null ? default : prevResult.Result), cancellationToken);
 
             while (result is RepeatResult<TInOut>)
                 result = await op.Execute(result.Result, cancellationToken);

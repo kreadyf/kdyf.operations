@@ -9,5 +9,8 @@ namespace kdyf.operations
     {
         IOperationInnerExecutor<TOp, TInOut, TInOut> Add<TOp, TInOut>(Func<TInOut> input)
             where TOp : IOperation<TInOut>;
+
+        IOperationInnerExecutor<TOp, TInOut, TInOut> Add<TOp, TInOut>()
+            where TOp : IOperation<TInOut>;
     }
 }

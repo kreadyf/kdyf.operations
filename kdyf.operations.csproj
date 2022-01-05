@@ -4,7 +4,7 @@
     <TargetFramework>netstandard2.1</TargetFramework>
     <Nullable>enable</Nullable>
     <PackageId>kdyf.operations</PackageId>
-    <Version>1.0.0</Version>
+    <Version>1.0.1.0</Version>
     <Authors>kreadyf</Authors>
     <Company>kreadyf</Company>
     <Product>kreadyf.operations</Product>
